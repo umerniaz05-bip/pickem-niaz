@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Family Pick'em",
-    short_name: "Pick'em",
+    name: "Niaz Family Pick'em",
+    short_name: "Niaz Pick'em",
     description: "Private NFL Pick'em for the family.",
     start_url: "/picks",
     scope: "/",

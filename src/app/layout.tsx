@@ -15,12 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Family Pick'em",
+  title: "Niaz Family Pick'em",
   description: "Private NFL Pick'em for the family.",
-  applicationName: "Family Pick'em",
+  applicationName: "Niaz Family Pick'em",
   appleWebApp: {
     capable: true,
-    title: "Pick'em",
+    title: "Niaz Pick'em",
     statusBarStyle: "black-translucent",
   },
   icons: {

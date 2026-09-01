@@ -5,7 +5,7 @@ import { clampWeek } from "@/lib/games";
 import { FamilyScreen } from "../FamilyScreen";
 
 export const metadata: Metadata = {
-  title: "Family · Family Pick'em",
+  title: "Family · Niaz Family Pick'em",
 };
 
 export default async function FamilyWeekPage({

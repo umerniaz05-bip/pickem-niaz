@@ -5,7 +5,7 @@ import { clampWeek } from "@/lib/games";
 import { StandingsScreen } from "../StandingsScreen";
 
 export const metadata: Metadata = {
-  title: "Standings · Family Pick'em",
+  title: "Standings · Niaz Family Pick'em",
 };
 
 export default async function StandingsWeekPage({

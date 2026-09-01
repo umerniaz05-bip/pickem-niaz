@@ -7,7 +7,7 @@ import { signOut } from "./actions";
 import { ProfileForm } from "./profile-form";
 
 export const metadata: Metadata = {
-  title: "Profile · Family Pick'em",
+  title: "Profile · Niaz Family Pick'em",
 };
 
 export default async function ProfilePage() {
