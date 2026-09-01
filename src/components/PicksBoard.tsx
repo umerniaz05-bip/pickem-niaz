@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Countdown } from "@/components/Countdown";
 import { GameCard, type SaveState } from "@/components/GameCard";
 import { createClient } from "@/lib/supabase/client";
-import { isKickoffPassed } from "@/lib/games";
+import { isGameLocked } from "@/lib/games";
 import type { Game, Team } from "@/lib/types";
 
 export function PicksBoard({
@@ -31,7 +31,7 @@ export function PicksBoard({
   const select = useCallback(
     async (game: Game, teamId: string) => {
       // Client-side lock guard; the DB enforces it authoritatively too.
-      if (isKickoffPassed(game.kickoffTime)) return;
+      if (isGameLocked(game)) return;
       if (picks[game.id] === teamId && saveState[game.id] !== "error") return;
 
       const previous = picks[game.id];
@@ -71,7 +71,7 @@ export function PicksBoard({
     const upcoming = games
       .filter(
         (g) =>
-          !isKickoffPassed(g.kickoffTime) &&
+          !isGameLocked(g) &&
           g.status !== "canceled" &&
           g.status !== "postponed",
       )
@@ -114,7 +114,7 @@ export function PicksBoard({
               game={game}
               teams={teams}
               pickedTeamId={picks[game.id] ?? null}
-              locked={isKickoffPassed(game.kickoffTime)}
+              locked={isGameLocked(game)}
               saveState={saveState[game.id] ?? "idle"}
               onSelect={(teamId) => select(game, teamId)}
             />

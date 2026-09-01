@@ -155,7 +155,12 @@ security definer
 set search_path = public
 as $$
   select coalesce(
-    (select g.kickoff_time <= now() from public.games g where g.id = p_game_id),
+    (
+      select g.kickoff_time <= now()
+          or g.status in ('in_progress', 'halftime', 'final')
+      from public.games g
+      where g.id = p_game_id
+    ),
     true  -- unknown game -> treat as locked (fail safe)
   );
 $$;
@@ -172,7 +177,7 @@ as $$
 declare
   g record;
 begin
-  select home_team_id, away_team_id, kickoff_time
+  select home_team_id, away_team_id, kickoff_time, status
     into g
   from public.games
   where id = new.game_id;
@@ -187,11 +192,12 @@ begin
   end if;
 
   if current_user not in ('service_role', 'postgres') then
-    -- Enforce kickoff lock on the server side regardless of client behaviour.
+    -- Enforce the lock on the server side regardless of client behaviour.
     -- service_role = PostgREST trusted calls; postgres = SECURITY DEFINER
     -- functions (scoring) and migrations.
-    if g.kickoff_time <= now() then
-      raise exception 'Game % is locked (kickoff has passed)', new.game_id;
+    if g.kickoff_time <= now()
+       or g.status in ('in_progress', 'halftime', 'final') then
+      raise exception 'Game % is locked', new.game_id;
     end if;
 
     -- Clients may never award themselves points.

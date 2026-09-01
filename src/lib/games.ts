@@ -176,9 +176,25 @@ export function isKickoffPassed(kickoffTime: string): boolean {
   return new Date(kickoffTime).getTime() <= Date.now();
 }
 
+const STARTED_STATUSES = ["in_progress", "halftime", "final"];
+
+/**
+ * Mirrors the DB's is_game_locked(): locked once kickoff has passed OR the game
+ * has actually started/finished (covers backfilled finals with a future
+ * kickoff_time). The server still enforces this authoritatively.
+ */
+export function isGameLocked(game: {
+  kickoffTime: string;
+  status: GameStatus;
+}): boolean {
+  return (
+    isKickoffPassed(game.kickoffTime) || STARTED_STATUSES.includes(game.status)
+  );
+}
+
 export function isPlayable(game: Game): boolean {
   return (
-    !isKickoffPassed(game.kickoffTime) &&
+    !isGameLocked(game) &&
     game.status !== "canceled" &&
     game.status !== "postponed"
   );

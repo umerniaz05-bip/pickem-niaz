@@ -6,7 +6,7 @@ import {
   getTeams,
   getVisiblePicksForGames,
   getWeekGames,
-  isKickoffPassed,
+  isGameLocked,
   resolveCurrentWeek,
 } from "@/lib/games";
 import { createClient } from "@/lib/supabase/server";
@@ -97,7 +97,7 @@ function FamilyGameCard({
   const home = game.homeTeamId ? teams[game.homeTeamId] : undefined;
   if (!away || !home) return null;
 
-  const revealed = isKickoffPassed(game.kickoffTime);
+  const revealed = isGameLocked(game);
   const isFinal = game.status === "final";
 
   return (

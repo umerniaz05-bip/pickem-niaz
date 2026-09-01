@@ -75,6 +75,23 @@ describe("per-game scoring", () => {
     expect((await getWeekly(users[1], week))?.correctPicks).toBe(1);
   });
 
+  test("a final game whose kickoff_time is still in the future still scores", async () => {
+    // Backfill scenario: provider marks a game final before our kickoff_time.
+    const week = nextWeek();
+    const g = await createGame({ week, kickoffOffsetMs: 60 * 60 * 1000 });
+    await setPick(users[0], g, HOME);
+    await setPick(users[1], g, AWAY);
+    await finalizeGame(g, { winner: HOME });
+
+    expect((await getPick(users[0], g)).pointsEarned).toBe(1);
+    expect((await getPick(users[1], g)).pointsEarned).toBe(0);
+    expect(await getWeekly(users[0], week)).toMatchObject({
+      correctPicks: 1,
+      weeklyPoints: 1,
+      isWeekComplete: true,
+    });
+  });
+
   test("actual tied NFL game: both selections count as correct", async () => {
     const week = nextWeek();
     const g = await createGame({ week, kickoffOffsetMs: -1000 });
