@@ -9,9 +9,10 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Run on everything except Next internals and static asset files so auth
-     * redirects never block CSS / JS / images.
+     * Run on everything except API routes (they do their own auth), Next
+     * internals, and static asset files — so auth redirects never hit the
+     * sync endpoint or block CSS / JS / images.
      */
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!api/|_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
