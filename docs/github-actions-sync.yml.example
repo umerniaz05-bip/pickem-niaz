@@ -1,0 +1,23 @@
+name: NFL sync
+
+# Frequent score sync on game days (Vercel Hobby cron only allows once/day, so
+# vercel.json keeps a daily safety sync and this covers live windows).
+# Times are UTC. NFL games run Thu evening, Sun ~17:00-05:00, Mon evening.
+on:
+  schedule:
+    - cron: "*/5 17-23 * * 0" # Sun afternoon/evening ET
+    - cron: "*/5 0-5 * * 1,2" # Sun night -> Mon early, Mon night -> Tue early
+    - cron: "*/5 0-4 * * 5" # Thu night game -> Fri early
+  workflow_dispatch: # manual "Run workflow" button
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit /api/sync
+        run: |
+          code=$(curl -sS -o /tmp/body -w '%{http_code}' -X POST \
+            -H "authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SYNC_URL }}")
+          echo "HTTP $code"; cat /tmp/body; echo
+          test "$code" = "200"
