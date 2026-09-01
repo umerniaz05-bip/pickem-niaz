@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { GameStatusPill } from "@/components/GameStatusPill";
 import { WeekSelector } from "@/components/WeekSelector";
 import {
@@ -48,6 +49,7 @@ export async function FamilyScreen({ week }: { week?: number }) {
 
   return (
     <main className="flex flex-1 flex-col gap-4 py-2">
+      <AutoRefresh />
       <WeekSelector basePath="/family" currentWeek={resolvedWeek} />
       <div>
         <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">

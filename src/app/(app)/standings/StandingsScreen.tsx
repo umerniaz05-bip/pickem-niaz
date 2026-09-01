@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { StandingsTabs } from "@/components/StandingsTabs";
 import { resolveCurrentWeek } from "@/lib/games";
 import {
@@ -20,6 +21,7 @@ export async function StandingsScreen({ week }: { week?: number }) {
 
   return (
     <main className="flex flex-1 flex-col gap-4 py-2">
+      <AutoRefresh />
       <StandingsTabs mode={mode} />
       {mode === "season" ? (
         <SeasonTable supabase={supabase} currentWeek={currentWeek} youId={user.id} />

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { PicksBoard } from "@/components/PicksBoard";
 import { WeekSelector } from "@/components/WeekSelector";
 import {
@@ -35,6 +36,7 @@ export async function PicksScreen({ week }: { week?: number }) {
 
   return (
     <main className="flex flex-1 flex-col gap-4 py-2">
+      <AutoRefresh />
       <WeekSelector basePath="/picks" currentWeek={resolvedWeek} />
       <PicksBoard
         week={resolvedWeek}
