@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Family NFL Pick'em
 
-## Getting Started
+Private, mobile-first NFL Pick'em for a small family group. Next.js + Supabase.
+Full spec in [`CLAUDE.md`](./CLAUDE.md).
 
-First, run the development server:
+## Local setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # fill in Supabase URL + keys + CRON_SECRET
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Database
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Migrations are plain SQL in [`supabase/migrations/`](./supabase/migrations), applied in order:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# with psql and your Supabase connection string
+for f in supabase/migrations/*.sql; do psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"; done
+```
 
-## Learn More
+`0001` schema · `0002` RLS · `0004` team seed · `0005` scoring · `0003/0006/0007` fixes.
 
-To learn more about Next.js, take a look at the following resources:
+### Accounts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+No public sign-up. Create accounts with the service-role key:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+node --env-file=.env.local scripts/create-user.mjs \
+  --email mom@example.com --password 'pw' --username mom --display "Mom"
+```
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Script | Purpose |
+| --- | --- |
+| `scripts/create-user.mjs` | Provision a family login. |
+| `scripts/seed-games.mjs` | Insert a **fake** Week 1 slate (kickoffs relative to now) for UI testing. Re-run to reset. |
+| `scripts/simulate-finals.mjs --week 1 [--all]` | Mark that week's games final with made-up scores and run scoring. Dev only. |
+| `scripts/sync.mjs [--week N] [--url ...]` | Trigger a real NFL sync via `/api/sync` (needs the dev server or a deployment running). |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## NFL data sync
+
+`/api/sync` pulls from the provider ([`src/lib/nfl/`](./src/lib/nfl) — ESPN adapter
+behind the `NflDataProvider` interface), upserts only changed `games` rows,
+(re)scores newly-final games, and refreshes weekly totals. It is idempotent and
+guarded by `CRON_SECRET` (fails closed if unset).
+
+```bash
+# manual
+curl -X POST -H "authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/sync?week=1"
+```
+
+**Switching from seed data to real games:** delete the fake slate, then sync.
+
+```bash
+# remove SEED-* games for the season, then:
+node --env-file=.env.local scripts/sync.mjs --week 1
+```
+
+### Cron
+
+[`vercel.json`](./vercel.json) schedules `/api/sync` every minute. **Sub-daily Vercel
+Cron requires a Pro plan**; on Hobby, change the schedule to something daily or
+trigger `/api/sync` from an external scheduler. Set `CRON_SECRET` in the Vercel
+project env (Vercel Cron sends it as `Authorization: Bearer <value>` automatically).
+
+## Tests
+
+```bash
+npm test   # vitest — scoring rules + NFL normalize/sync, against a season-9999 sandbox
+```
+
+## Deployment
+
+Vercel. Set env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET` (and optionally `NFL_API_BASE_URL`).

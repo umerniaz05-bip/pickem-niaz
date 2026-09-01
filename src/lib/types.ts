@@ -83,4 +83,6 @@ export interface NflGame {
   awayScore: number | null;
   kickoffTime: string; // ISO 8601 UTC
   status: GameStatus;
+  winnerTeamId: string | null;
+  isTie: boolean;
 }
