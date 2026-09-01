@@ -53,7 +53,7 @@ export async function FamilyScreen({ week }: { week?: number }) {
       <WeekSelector basePath="/family" currentWeek={resolvedWeek} />
       <div>
         <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Family Picks · Week {resolvedWeek}
+          Niaz Family Picks · Week {resolvedWeek}
         </h1>
         <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
           Everyone&apos;s picks appear once each game kicks off.
