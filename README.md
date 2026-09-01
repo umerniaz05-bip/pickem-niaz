@@ -76,3 +76,7 @@ npm test   # vitest — scoring rules + NFL normalize/sync, against a season-999
 
 Vercel. Set env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
 `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET` (and optionally `NFL_API_BASE_URL`).
+
+Project **Framework Preset must be "Next.js"** (Settings → Build and Deployment).
+If it's "Other", the build runs but no routes are created and every path 404s
+with no function logs. `next build` uses `--webpack` (see `package.json`).
