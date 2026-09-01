@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { GameStatusPill } from "@/components/GameStatusPill";
 import { TeamOption } from "@/components/TeamOption";
 import type { Game, Team } from "@/lib/types";
@@ -74,21 +76,26 @@ function SaveIndicator({
   hasPick: boolean;
   state: SaveState;
 }) {
+  const cls = "text-xs font-medium";
+  let content: ReactNode = null;
   if (state === "saving")
-    return <span className="text-xs text-zinc-400">Saving…</span>;
-  if (state === "saved")
-    return (
-      <span className="text-xs font-medium text-green-600 dark:text-green-400">
-        Saved ✓
-      </span>
+    content = <span className="text-xs text-zinc-400">Saving…</span>;
+  else if (state === "saved")
+    content = (
+      <span className={`${cls} text-green-600 dark:text-green-400`}>Saved ✓</span>
     );
-  if (state === "error")
-    return (
-      <span className="text-xs font-medium text-red-600 dark:text-red-400">
+  else if (state === "error")
+    content = (
+      <span className={`${cls} text-red-600 dark:text-red-400`}>
         Not saved — tap to retry
       </span>
     );
-  if (locked && !hasPick)
-    return <span className="text-xs text-zinc-400">No pick</span>;
-  return null;
+  else if (locked && !hasPick)
+    content = <span className="text-xs text-zinc-400">No pick</span>;
+
+  return (
+    <span role="status" aria-live="polite">
+      {content}
+    </span>
+  );
 }

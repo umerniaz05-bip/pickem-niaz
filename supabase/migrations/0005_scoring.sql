@@ -177,10 +177,12 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Grants: these are trusted server operations only.
 -- ---------------------------------------------------------------------------
-revoke all on function public.refresh_week_totals(int, int) from public;
-revoke all on function public.score_game(uuid) from public;
-revoke all on function public.finalize_week(int, int) from public;
-revoke all on function public.rescore_week(int, int) from public;
+-- `from public` alone is not enough: Supabase's default privileges also grant
+-- EXECUTE to anon + authenticated explicitly. Revoke all three.
+revoke all on function public.refresh_week_totals(int, int) from public, anon, authenticated;
+revoke all on function public.score_game(uuid) from public, anon, authenticated;
+revoke all on function public.finalize_week(int, int) from public, anon, authenticated;
+revoke all on function public.rescore_week(int, int) from public, anon, authenticated;
 
 grant execute on function public.score_game(uuid) to service_role;
 grant execute on function public.finalize_week(int, int) to service_role;

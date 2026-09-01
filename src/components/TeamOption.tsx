@@ -28,13 +28,27 @@ export function TeamOption({
         : "border-zinc-900 bg-zinc-100 dark:border-zinc-100 dark:bg-zinc-800"
     : "border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700";
 
+  const focus =
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:focus-visible:outline-zinc-100";
+
+  const ariaLabel =
+    `Pick ${team.city} ${team.name}` +
+    (selected ? " — your pick" : "") +
+    (outcome === "correct"
+      ? ", correct"
+      : outcome === "incorrect"
+        ? ", incorrect"
+        : "") +
+    (disabled ? ", locked" : "");
+
   return (
     <button
       type="button"
       onClick={onSelect}
       disabled={disabled}
       aria-pressed={selected}
-      className={`${base} ${state} ${disabled ? "cursor-default opacity-60" : "cursor-pointer active:scale-[0.99]"}`}
+      aria-label={ariaLabel}
+      className={`${base} ${state} ${focus} ${disabled ? "cursor-default opacity-60" : "cursor-pointer active:scale-[0.99]"}`}
     >
       {team.logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -70,9 +84,17 @@ export function TeamOption({
                 ? "text-red-600 dark:text-red-400"
                 : "text-zinc-900 dark:text-zinc-100"
           }`}
-          aria-hidden="true"
         >
-          {outcome === "correct" ? "✓" : outcome === "incorrect" ? "✗" : "●"}
+          <span aria-hidden="true">
+            {outcome === "correct" ? "✓" : outcome === "incorrect" ? "✗" : "●"}
+          </span>
+          <span className="sr-only">
+            {outcome === "correct"
+              ? "Correct pick"
+              : outcome === "incorrect"
+                ? "Incorrect pick"
+                : "Selected"}
+          </span>
         </span>
       ) : null}
     </button>

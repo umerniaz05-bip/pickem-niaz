@@ -34,7 +34,10 @@ export function GameStatusPill({
   if (live) {
     return (
       <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-600 dark:bg-red-400" />
+        <span
+          aria-hidden="true"
+          className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-600 dark:bg-red-400"
+        />
         Live{scoreline ? <span className="tabular-nums">{scoreline}</span> : null}
       </span>
     );

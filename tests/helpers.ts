@@ -1,17 +1,57 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!url || !serviceRoleKey) {
+if (
+  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  !process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+) {
   throw new Error(
-    "Tests need NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY. " +
-      "Run via: npm test (uses node --env-file=.env.local)",
+    "Tests need NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY and " +
+      "SUPABASE_SERVICE_ROLE_KEY. Run via: npm test (uses node --env-file=.env.local)",
   );
 }
 
-export const admin: SupabaseClient = createClient(url, serviceRoleKey, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+const SUPABASE_URL: string = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const ANON_KEY: string = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SERVICE_ROLE_KEY: string = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+export const admin: SupabaseClient = createClient(
+  SUPABASE_URL,
+  SERVICE_ROLE_KEY,
+  { auth: { autoRefreshToken: false, persistSession: false } },
+);
+
+/** An anon client with no session — represents a logged-out browser. */
+export function anonClient(): SupabaseClient {
+  return createClient(SUPABASE_URL, ANON_KEY, {
+    auth: { persistSession: false },
+  });
+}
+
+/** Create a user and return a client already signed in as them. */
+export async function makeUserClient(): Promise<{
+  id: string;
+  email: string;
+  client: SupabaseClient;
+}> {
+  const email = `rls-test-${crypto.randomUUID()}@pickem.test`;
+  const password = `${crypto.randomUUID()}Aa1!`;
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+  if (error) throw error;
+
+  const client = anonClient();
+  const { error: signInError } = await client.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (signInError) throw signInError;
+
+  return { id: data.user.id, email, client };
+}
 
 /** Sandbox season — never collides with real data. */
 export const TEST_SEASON = 9999;
