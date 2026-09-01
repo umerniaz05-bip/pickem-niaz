@@ -186,8 +186,10 @@ begin
     raise exception 'Picked team % is not part of game %', new.picked_team_id, new.game_id;
   end if;
 
-  if current_user <> 'service_role' then
+  if current_user not in ('service_role', 'postgres') then
     -- Enforce kickoff lock on the server side regardless of client behaviour.
+    -- service_role = PostgREST trusted calls; postgres = SECURITY DEFINER
+    -- functions (scoring) and migrations.
     if g.kickoff_time <= now() then
       raise exception 'Game % is locked (kickoff has passed)', new.game_id;
     end if;
